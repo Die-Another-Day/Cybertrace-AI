@@ -26,9 +26,18 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting CyberTrace AI backend...")
-    await init_db()
-    await init_graph_schema()
-    logger.info("Databases initialized.")
+
+    try:
+        await init_db()
+        logger.info("PostgreSQL connected.")
+    except Exception as e:
+        logger.error(f"PostgreSQL connection failed: {e}")
+    try:
+        await init_graph_schema()
+        logger.info("Neo4j connected.")
+    except Exception as e:
+        logger.error(f"Neo4j connection failed: {e}")
+
     yield
     await close_neo4j_driver()
     logger.info("CyberTrace AI backend stopped.")
